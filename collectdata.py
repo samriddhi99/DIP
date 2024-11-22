@@ -79,54 +79,104 @@ while True:
         print(f"Saving A: {save_path}")
     if interrupt & 0xFF == ord('b'):
         cv2.imwrite(directory+'B/'+str(count['b'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving B: {save_path}")
     if interrupt & 0xFF == ord('c'):
         cv2.imwrite(directory+'C/'+str(count['c'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving C: {save_path}")
     if interrupt & 0xFF == ord('d'):
         cv2.imwrite(directory+'D/'+str(count['d'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving D: {save_path}")
     if interrupt & 0xFF == ord('e'):
         cv2.imwrite(directory+'E/'+str(count['e'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving E: {save_path}")
     if interrupt & 0xFF == ord('f'):
         cv2.imwrite(directory+'F/'+str(count['f'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving F: {save_path}")
     if interrupt & 0xFF == ord('g'):
         cv2.imwrite(directory+'G/'+str(count['g'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving G: {save_path}")
     if interrupt & 0xFF == ord('h'):
         cv2.imwrite(directory+'H/'+str(count['h'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving H: {save_path}")
     if interrupt & 0xFF == ord('i'):
         cv2.imwrite(directory+'I/'+str(count['i'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving I: {save_path}")
     if interrupt & 0xFF == ord('j'):
         cv2.imwrite(directory+'J/'+str(count['j'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving J: {save_path}")
     if interrupt & 0xFF == ord('k'):
         cv2.imwrite(directory+'K/'+str(count['k'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving K: {save_path}")
     if interrupt & 0xFF == ord('l'):
         cv2.imwrite(directory+'L/'+str(count['l'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving L: {save_path}")
     if interrupt & 0xFF == ord('m'):
         cv2.imwrite(directory+'M/'+str(count['m'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving M: {save_path}")
     if interrupt & 0xFF == ord('n'):
         cv2.imwrite(directory+'N/'+str(count['n'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving N: {save_path}")
     if interrupt & 0xFF == ord('o'):
         cv2.imwrite(directory+'O/'+str(count['o'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving O: {save_path}")
     if interrupt & 0xFF == ord('p'):
         cv2.imwrite(directory+'P/'+str(count['p'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving P: {save_path}")
     if interrupt & 0xFF == ord('q'):
         cv2.imwrite(directory+'Q/'+str(count['q'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving Q: {save_path}")
     if interrupt & 0xFF == ord('r'):
         cv2.imwrite(directory+'R/'+str(count['r'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving R: {save_path}")
     if interrupt & 0xFF == ord('s'):
         cv2.imwrite(directory+'S/'+str(count['s'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving S: {save_path}")
     if interrupt & 0xFF == ord('t'):
         cv2.imwrite(directory+'T/'+str(count['t'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving T: {save_path}")
     if interrupt & 0xFF == ord('u'):
         cv2.imwrite(directory+'U/'+str(count['u'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving U: {save_path}")
     if interrupt & 0xFF == ord('v'):
         cv2.imwrite(directory+'V/'+str(count['v'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving V: {save_path}")
     if interrupt & 0xFF == ord('w'):
         cv2.imwrite(directory+'W/'+str(count['w'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving W: {save_path}")
     if interrupt & 0xFF == ord('x'):
         cv2.imwrite(directory+'X/'+str(count['x'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving X: {save_path}")
     if interrupt & 0xFF == ord('y'):
         cv2.imwrite(directory+'Y/'+str(count['y'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving Y: {save_path}")
     if interrupt & 0xFF == ord('z'):
         cv2.imwrite(directory+'Z/'+str(count['z'])+'.png',frame)
+        cv2.imwrite(save_path, frame)
+        print(f"Saving Z: {save_path}")
     if interrupt & 0xFF == 27:  # 27 is the ASCII code for ESC key
         print("Exiting program...")
         break
