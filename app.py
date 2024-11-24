@@ -52,7 +52,7 @@ with mp_hands.Hands(
         sequence.append(keypoints)
 
         # Print sequence length and debug information
-        print(f"Sequence Length: {len(sequence)}")
+        #print(f"Sequence Length: {len(sequence)}")
 
         # Dynamically handle sequence length without padding
         if len(sequence) >= 30:
@@ -64,8 +64,8 @@ with mp_hands.Hands(
         try:
             if len(sequence) > 0:
                 res = model.predict(np.expand_dims(sequence, axis=0))[0]
-                print(f"Predicted probabilities: {res}")
-                print(f"Predicted class: {actions[np.argmax(res)]}")
+                #print(f"Predicted probabilities: {res}")
+                #print(f"Predicted class: {actions[np.argmax(res)]}")
 
                 predictions.append(np.argmax(res))
 

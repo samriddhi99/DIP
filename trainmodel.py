@@ -12,7 +12,7 @@ DATA_PATH = os.path.join('MP_Data')
 
 # Actions and number of sequences
 actions = np.array(['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'])
-no_sequences = 14  # Number of sequences for each action
+no_sequences = 30  # Number of sequences for each action
 
 # Label map to convert action labels to numeric values
 label_map = {label: num for num, label in enumerate(actions)}
