@@ -1,102 +1,199 @@
-from sklearn.model_selection import train_test_split
-from keras.utils import to_categorical
-from keras.models import Sequential
-from keras.layers import LSTM, Dense
-from keras.callbacks import TensorBoard
-import numpy as np
 import os
-from collections import Counter
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from tensorflow.keras.utils import to_categorical
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout, BatchNormalization
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau, ModelCheckpoint
+from sklearn.metrics import classification_report, confusion_matrix
 
-# Path where the data is stored
-DATA_PATH = os.path.join('MP_Data')
+# Configuration
+DATA_PATH = 'MP_Data'
+actions = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+max_sequence_length = 30
 
-# Actions and number of sequences
-actions = np.array(['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'])
-no_sequences = 30  # Number of sequences for each action
-
-# Label map to convert action labels to numeric values
-label_map = {label: num for num, label in enumerate(actions)}
-
-# Store sequences and labels
-sequences, labels = [], []
-
-# Maximum sequence length (based on the longest sequence you want to handle)
-max_sequence_length = 30  # Can be adjusted depending on your data
-
-# Loop through all actions (A to Z)
-for action in actions:
-    action_sequences = 0  # Keep track of valid sequences for this action
+def load_data():
+    """
+    Load sign language data with detailed preprocessing
+    """
+    sequences, labels = [], []
     
-    # Loop through sequence folders (0 to 14)
-    for sequence in range(no_sequences):
-        window = []
+    for action_idx, action in enumerate(actions):
+        action_path = os.path.join(DATA_PATH, action)
         
-        # Loop through frames (0 to n.npy) in each sequence folder
-        for frame_num in range(max_sequence_length):  # Attempt to read max_sequence_length frames
-            file_path = os.path.join(DATA_PATH, action, str(sequence), f"{frame_num}.npy")
-            if os.path.exists(file_path):  # Check if file exists
-                res = np.load(file_path)
-                window.append(res)
-            else:
-                break  # Stop if a frame is missing in this sequence
-        
-        # If the sequence has at least one frame, process it
-        if window:
-            # Pad sequences that have fewer frames to max_sequence_length
-            if len(window) < max_sequence_length:
-                padding = [np.zeros_like(window[0])] * (max_sequence_length - len(window))  # Create zero padding
-                window.extend(padding)
-            sequences.append(window)
-            labels.append(label_map[action])
-            action_sequences += 1  # Increment count of sequences for this action
+        for sequence in range(30):  # Assuming 30 sequences per action
+            sequence_path = os.path.join(action_path, str(sequence))
+            
+            # Read all frames for this sequence
+            window = []
+            for frame_num in range(max_sequence_length):
+                file_path = os.path.join(sequence_path, f"{frame_num}.npy")
+                
+                try:
+                    frame = np.load(file_path)
+                    window.append(frame)
+                except Exception as e:
+                    print(f"Error loading {file_path}: {e}")
+                    break
+            
+            # Ensure consistent sequence length
+            if len(window) == max_sequence_length:
+                sequences.append(window)
+                labels.append(action_idx)
     
-    # Print the number of valid sequences for each action
-    print(f"Action {action} has {action_sequences} valid sequences.")
+    # Convert to numpy arrays
+    X = np.array(sequences)
+    y = to_categorical(labels)
+    
+    return X, y
 
-# Check the label distribution after filtering out incomplete sequences
-print("Label distribution in training data:", Counter(labels))
+def create_advanced_model(input_shape, num_classes):
+    """
+    Create a more sophisticated LSTM model
+    """
+    model = Sequential([
+        # First LSTM layer with batch normalization
+        LSTM(128, return_sequences=True, 
+             input_shape=input_shape,
+             dropout=0.2, 
+             recurrent_dropout=0.2),
+        BatchNormalization(),
+        
+        # Second LSTM layer
+        LSTM(256, return_sequences=True, 
+             dropout=0.3, 
+             recurrent_dropout=0.3),
+        BatchNormalization(),
+        
+        # Third LSTM layer
+        LSTM(128, return_sequences=False),
+        
+        # Dense layers with dropout and batch normalization
+        Dense(256, activation='relu'),
+        BatchNormalization(),
+        Dropout(0.4),
+        
+        Dense(128, activation='relu'),
+        BatchNormalization(),
+        Dropout(0.3),
+        
+        # Output layer
+        Dense(num_classes, activation='softmax')
+    ])
+    
+    # Compile with custom learning rate
+    optimizer = Adam(learning_rate=0.001)
+    model.compile(
+        optimizer=optimizer, 
+        loss='categorical_crossentropy', 
+        metrics=['accuracy']
+    )
+    
+    return model
 
-# Convert sequences and labels to numpy arrays
-X = np.array(sequences)  # Shape: (num_samples, max_sequence_length, feature_dim)
-y = to_categorical(labels).astype(int)
+def train_and_evaluate_model():
+    """
+    Comprehensive model training and evaluation
+    """
+    # Load data
+    X, y = load_data()
+    
+    # Split data
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, stratify=y, random_state=42
+    )
+    
+    # Create model
+    num_classes = y.shape[1]
+    model = create_advanced_model(
+        input_shape=(X.shape[1], X.shape[2]), 
+        num_classes=num_classes
+    )
+    
+    # Print model summary
+    model.summary()
+    
+    # Callbacks
+    early_stopping = EarlyStopping(
+        monitor='val_loss', 
+        patience=20, 
+        restore_best_weights=True
+    )
+    
+    reduce_lr = ReduceLROnPlateau(
+        monitor='val_loss', 
+        factor=0.2, 
+        patience=10, 
+        min_lr=0.00001
+    )
+    
+    model_checkpoint = ModelCheckpoint(
+        'best_model.h5', 
+        save_best_only=True, 
+        monitor='val_accuracy'
+    )
+    
+    # Train model
+    history = model.fit(
+        X_train, y_train, 
+        epochs=300, 
+        validation_split=0.2,
+        callbacks=[early_stopping, reduce_lr, model_checkpoint],
+        batch_size=32
+    )
+    
+    # Evaluate model
+    test_loss, test_acc = model.evaluate(X_test, y_test)
+    print(f"\nTest Accuracy: {test_acc * 100:.2f}%")
+    
+    # Predictions for detailed analysis
+    y_pred = model.predict(X_test)
+    y_pred_classes = np.argmax(y_pred, axis=1)
+    y_true_classes = np.argmax(y_test, axis=1)
+    
+    # Classification report
+    print("\nDetailed Classification Report:")
+    print(classification_report(y_true_classes, y_pred_classes, target_names=actions))
+    
+    # Confusion Matrix
+    cm = confusion_matrix(y_true_classes, y_pred_classes)
+    plt.figure(figsize=(12, 10))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', 
+                xticklabels=actions, yticklabels=actions)
+    plt.title('Confusion Matrix')
+    plt.xlabel('Predicted Label')
+    plt.ylabel('True Label')
+    plt.tight_layout()
+    plt.savefig('confusion_matrix.png')
+    
+    # Training History Visualization
+    plt.figure(figsize=(12, 4))
+    plt.subplot(1, 2, 1)
+    plt.plot(history.history['accuracy'], label='Training Accuracy')
+    plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
+    plt.title('Model Accuracy')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.legend()
 
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05, random_state=42)
+    plt.subplot(1, 2, 2)
+    plt.plot(history.history['loss'], label='Training Loss')
+    plt.plot(history.history['val_loss'], label='Validation Loss')
+    plt.title('Model Loss')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('training_history.png')
+    
+    # Save final model
+    model.save('final_model.h5')
+    
+    return model, history
 
-# TensorBoard callback
-log_dir = os.path.join('Logs')
-tb_callback = TensorBoard(log_dir=log_dir)
-
-# Model definition
-num_classes = 26  # Get the number of classes based on one-hot encoding
-
-model = Sequential([
-    LSTM(64, return_sequences=True, activation='relu', input_shape=(max_sequence_length, X.shape[2])),
-    LSTM(128, return_sequences=True, activation='relu'),
-    LSTM(64, return_sequences=False, activation='relu'),
-    Dense(64, activation='relu'),
-    Dense(32, activation='relu'),
-    Dense(num_classes, activation='softmax')  # Output layer for classification
-])
-
-model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-
-# Train the model
-model.fit(X_train, y_train, epochs=200, callbacks=[tb_callback])
-
-# Save the model in Keras format
-model_json = model.to_json()
-with open("model.json", "w") as json_file:
-    json_file.write(model_json)
-model.save('model.h5')  # Save model in native Keras format
-
-# Evaluate the model on test data
-test_loss, test_acc = model.evaluate(X_test, y_test)
-print(f"Test accuracy: {test_acc}")
-
-# Testing predictions on the first 5 samples
-print("Testing model predictions:")
-for i in range(5):  # Testing on first 5 samples
-    prediction = model.predict(np.expand_dims(X_test[i], axis=0))
-    predicted_class = np.argmax(prediction)
-    print(f"Actual: {actions[np.argmax(y_test[i])]}, Predicted: {actions[predicted_class]}")
+# Run the training
+if __name__ == "__main__":
+    model, history = train_and_evaluate_model()

@@ -28,7 +28,7 @@ sequence = []
 sentence = []
 accuracy = []
 predictions = []
-threshold = 0.6
+threshold = 0.8
 
 cap = cv2.VideoCapture(0)
 # cap = cv2.VideoCapture("https://192.168.43.41:8080/video")
