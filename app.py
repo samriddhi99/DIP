@@ -31,30 +31,20 @@ predictions = []
 threshold = 0.8
 
 cap = cv2.VideoCapture(0)
-# cap = cv2.VideoCapture("https://192.168.43.41:8080/video")
-# Set mediapipe model
 with mp_hands.Hands(
     model_complexity=0,
     min_detection_confidence=0.5,
     min_tracking_confidence=0.5) as hands:
     while cap.isOpened():
 
-        # Read feed
         ret, frame = cap.read()
 
-        # Make detections
         cropframe = frame[40:400, 0:300]
         frame = cv2.rectangle(frame, (0, 40), (300, 400), 255, 2)
         image, results = mediapipe_detection(cropframe, hands)
-
-        # 2. Prediction logic
         keypoints = extract_keypoints(results)
         sequence.append(keypoints)
 
-        # Print sequence length and debug information
-        #print(f"Sequence Length: {len(sequence)}")
-
-        # Dynamically handle sequence length without padding
         if len(sequence) >= 30:
             sequence = sequence[-30:]  # Use last 30 keypoints
         elif len(sequence) < 30:
@@ -64,12 +54,11 @@ with mp_hands.Hands(
         try:
             if len(sequence) > 0:
                 res = model.predict(np.expand_dims(sequence, axis=0))[0]
-                #print(f"Predicted probabilities: {res}")
-                #print(f"Predicted class: {actions[np.argmax(res)]}")
+               
 
                 predictions.append(np.argmax(res))
 
-                # Viz logic
+             
                 if np.unique(predictions[-10:])[0] == np.argmax(res):
                     if res[np.argmax(res)] > threshold:
                         if len(sentence) > 0:
@@ -91,10 +80,9 @@ with mp_hands.Hands(
         cv2.putText(frame, "Output: -" + ' '.join(sentence) + ''.join(accuracy), (3, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
-        # Show to screen
         cv2.imshow('OpenCV Feed', frame)
 
-        # Break gracefully
+
         if cv2.waitKey(10) & 0xFF == ord('q'):
             break
 

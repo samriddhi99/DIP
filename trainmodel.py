@@ -7,8 +7,10 @@ import numpy as np
 import os
 from collections import Counter
 DATA_PATH = os.path.join('MP_Data')
-actions = np.array(['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'])
+actions = np.array(['A','B','C'])
+
 no_sequences = 30 
+
 label_map = {label: num for num, label in enumerate(actions)}
 sequences, labels = [], []
 max_sequence_length = 30 
@@ -32,12 +34,15 @@ for action in actions:
             action_sequences += 1
     print(f"Action {action} has {action_sequences} valid sequences.")
 print("Label distribution in training data:", Counter(labels))
+
+
+
 X = np.array(sequences)  # Shape: (num_samples, max_sequence_length, feature_dim)
 y = to_categorical(labels).astype(int)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05, random_state=42)
 log_dir = os.path.join('Logs')
 tb_callback = TensorBoard(log_dir=log_dir)
-num_classes = 26  # Get the number of classes based on one-hot encoding
+num_classes = 3  # Get the number of classes based on one-hot encoding
 model = Sequential([
     LSTM(64, return_sequences=True, activation='relu', input_shape=(max_sequence_length, X.shape[2])),
     LSTM(128, return_sequences=True, activation='relu'),
@@ -46,6 +51,8 @@ model = Sequential([
     Dense(32, activation='relu'),
     Dense(num_classes, activation='softmax')  # Output layer for classification
 ])
+
+
 model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
 model.fit(X_train, y_train, epochs=200, callbacks=[tb_callback])
 model_json = model.to_json()
