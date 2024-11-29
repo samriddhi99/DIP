@@ -43,18 +43,24 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05, random
 log_dir = os.path.join('Logs')
 tb_callback = TensorBoard(log_dir=log_dir)
 num_classes = 3  # Get the number of classes based on one-hot encoding
+
 model = Sequential([
-    LSTM(64, return_sequences=True, activation='relu', input_shape=(max_sequence_length, X.shape[2])),
+    LSTM(64, return_sequences=True, activation='relu', 
+         input_shape=(max_sequence_length, X.shape[2])),
     LSTM(128, return_sequences=True, activation='relu'),
     LSTM(64, return_sequences=False, activation='relu'),
     Dense(64, activation='relu'),
     Dense(32, activation='relu'),
-    Dense(num_classes, activation='softmax')  # Output layer for classification
+    Dense(num_classes, activation='softmax') 
 ])
 
 
-model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
-model.fit(X_train, y_train, epochs=200, callbacks=[tb_callback])
+model.compile(optimizer='Adam', 
+              loss='categorical_crossentropy', 
+              metrics=['categorical_accuracy'])
+model.fit(X_train, y_train, epochs=200)
+
+
 model_json = model.to_json()
 with open("model.json", "w") as json_file:
     json_file.write(model_json)
